@@ -46,11 +46,7 @@ void pre_auton(void) {
   // Example: clearing encoders, setting servo positions, ...
 }
 
-/*--------------------------------------------------
-void usercontrol(void) {
-  vexcodeInit();
-  CataMotor.setVelocity(75, percent);
-  CataMotor.setStopping(hold*/
+
 /*                                                                           */
 /*                              Autonomous Task                              */
 /*                                                                           */
@@ -61,6 +57,7 @@ void usercontrol(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
+  Drivetrain.driveFor(10, inches);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -76,11 +73,10 @@ void autonomous(void) {
 void usercontrol(void) {
   vexcodeInit();
   CataMotor.setPosition(1, degrees);
-  CataMotor.setVelocity(75, percent);
+  CataMotor.setVelocity(0, percent);
   CataMotor.setStopping(hold);
   Drivetrain.setStopping(coast);
-  Drivetrain.setDriveVelocity(100, percent);
-  Drivetrain.setTurnVelocity(100, percent);
+  Drivetrain.setTurnVelocity(0, percent);
   
 
   while (1) {

@@ -21,7 +21,7 @@ motor_group RightDriveGroup = motor_group(rightMotorA, rightMotorB, rightMotorC)
 
 // misc
 motor IntakeMotor = motor(PORT20, ratio6_1, true);
-motor CataMotor = motor(PORT1, ratio36_1, false);
+motor CataMotor = motor(PORT11, ratio36_1, false);
 digital_out IntakeSol = digital_out(Brain.ThreeWirePort.A);
 digital_out DoinkSol = digital_out(Brain.ThreeWirePort.B);
 digital_out MogoSol = digital_out(Brain.ThreeWirePort.H);
@@ -45,20 +45,12 @@ int toggleMogo = 0;
 int toggleDoink = 0;
 int cautiousDrive = 0;
 int cataPos = 0;
+int driveMultiplier = 100;
+
+bool checkMotor = true;
 bool DrivetrainLNeedsToBeStopped_Controller1 = true;
 bool DrivetrainRNeedsToBeStopped_Controller1 = true;
 
-void buttonReleased(){
-  if (!cautiousDrive){
-    Drivetrain.setDriveVelocity(100, percent);
-    Drivetrain.setTurnVelocity(100, percent);
-    cautiousDrive = false;
-  } else if (cautiousDrive){
-    Drivetrain.setDriveVelocity(20, percent);
-    Drivetrain.setTurnVelocity(20, percent);
-    cautiousDrive = true;
-  }
-}
 
 // define a task that will handle monitoring inputs from Controller1
 int rc_auto_loop_function_Controller1() {
@@ -108,8 +100,26 @@ int rc_auto_loop_function_Controller1() {
       }
 
       if (drivetrainRightSideSpeed != drivetrainLeftSideSpeed){
-        drivetrainRightSideSpeed = drivetrainRightSideSpeed / 2;
-        drivetrainLeftSideSpeed = drivetrainLeftSideSpeed / 2;
+        drivetrainRightSideSpeed = drivetrainRightSideSpeed;
+        drivetrainLeftSideSpeed = drivetrainLeftSideSpeed;
+      }
+
+     if (Controller1.ButtonB.pressing()) {
+
+        if (cautiousDrive == 0){
+          Drivetrain.setDriveVelocity(10, percent);
+          Drivetrain.setTurnVelocity(10, percent);
+          Brain.Screen.print("Cautious Drive is on");
+          Brain.Screen.newLine();
+          cautiousDrive = 1;
+        } else {
+          Drivetrain.setDriveVelocity(100, percent);
+          Drivetrain.setTurnVelocity(100, percent);
+          Brain.Screen.print("Cautious Drive is off");
+          Brain.Screen.newLine();
+          cautiousDrive = 0;
+        }
+        while (Controller1.ButtonB.pressing()){}
       }
 
       // only tell the left drive motor to spin if the values are not in the deadband range
@@ -125,9 +135,10 @@ int rc_auto_loop_function_Controller1() {
       }
 
       if (Controller1.ButtonB.pressing()) {
+
         if (cautiousDrive == 0){
-          Drivetrain.setDriveVelocity(50, percent);
-          Drivetrain.setTurnVelocity(50, percent);
+          Drivetrain.setDriveVelocity(10, percent);
+          Drivetrain.setTurnVelocity(10, percent);
           Brain.Screen.print("Cautious Drive is on");
           Brain.Screen.newLine();
           cautiousDrive = 1;
@@ -138,8 +149,7 @@ int rc_auto_loop_function_Controller1() {
           Brain.Screen.newLine();
           cautiousDrive = 0;
         }
-
-      while (Controller1.ButtonB.pressing()){}
+        while (Controller1.ButtonB.pressing()){}
       }
 
       if (Controller1.ButtonL1.pressing()) {
@@ -168,15 +178,6 @@ int rc_auto_loop_function_Controller1() {
         // set the toggle so that we don't constantly tell the motor to stop when the buttons are released
         CataStopped = true;
       }
-
-      // if (Controller1.ButtonUp.pressing()) {
-      //   if (cataPos == 0){
-      //     CataMotor.spinToPosition(80, degrees);
-      //     cataPos = 1;
-      //   } else {
-      //     CataMotor.spinToPosition(1, degrees);
-      //     cataPos = 0;
-      //   }
 
       if (CataMotor.position(degrees) < 0){
         wait(10, msec);
@@ -208,6 +209,14 @@ int rc_auto_loop_function_Controller1() {
         }
       while (Controller1.ButtonY.pressing()) {}
       }
+
+      /*while(checkMotor){
+        if (LeftDriveGroup.temperature() > 32 || RightDriveGroup.temperature() > 32){
+          Brain.Screen.print();
+          checkMotor = false;
+        }
+      }*/
+
     }
     // wait before repeating the process
     wait(20, msec);
